@@ -1,7 +1,7 @@
-
 int pushButton = 14;
 int buttonState = 0;
 int beforeState = 0;
+int counter = 0;
 
 // the setup routine runs once when you press reset:
 void setup() {
@@ -17,9 +17,14 @@ void loop() {
   buttonState = digitalRead(pushButton);
   // print out the state of the button:
   if(buttonState == 1 && beforeState == 0){
+    counter++;
     Serial.print("Serial Output: ");
+    Serial.print(counter);
     Serial.println(buttonState);
     delay(1); 
+  }
+  if(buttonState != beforeState){
+    delay(20);
   }
   beforeState = buttonState;
 }
