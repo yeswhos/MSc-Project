@@ -222,7 +222,9 @@ void loop()
     proxLeftActive = proxSensors.readBasicLeft();
     proxFrontActive = proxSensors.readBasicFront();
     proxRightActive = proxSensors.readBasicRight();
-
+    Serial.println(proxLeftActive);
+    Serial.println(proxFrontActive);
+    Serial.println(proxRightActive);
     // Read the line sensors.
     lineSensors.readCalibrated(lineSensorValues);
 
