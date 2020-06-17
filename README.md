@@ -19,3 +19,5 @@ Each student will be provided with a Zumo robot and all equipment to complete th
 
 
 There is scope in this project to develop teaching/instructional resources for use during educational outreach activities organised by the School of Computing.
+
+Personal MSc project in University of Leeds, school of computing.
