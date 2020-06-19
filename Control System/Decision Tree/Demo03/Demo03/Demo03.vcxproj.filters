@@ -14,4 +14,25 @@
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
   </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="C:\Users\yeswhos\Downloads\Decision-Tree-master\决策树\ID3.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\yeswhos\Downloads\Decision-Tree-master\决策树\C4_5.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\yeswhos\Downloads\Decision-Tree-master\决策树\CART.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="C:\Users\yeswhos\Downloads\Decision-Tree-master\决策树\DecisionTree.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="C:\Users\yeswhos\Downloads\Decision-Tree-master\决策树\test.csv">
+      <Filter>资源文件</Filter>
+    </None>
+  </ItemGroup>
 </Project>

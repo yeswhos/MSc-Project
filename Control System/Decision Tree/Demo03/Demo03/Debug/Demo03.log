@@ -1,0 +1,23 @@
+﻿  DecisionTree.cpp
+C:\Users\yeswhos\Downloads\Decision-Tree-master\决策树\ID3.h(22,18): warning C4018: “<”: 有符号/无符号不匹配
+C:\Users\yeswhos\Downloads\Decision-Tree-master\决策树\ID3.h(44,18): warning C4018: “<”: 有符号/无符号不匹配
+C:\Users\yeswhos\Downloads\Decision-Tree-master\决策树\C4_5.h(24,18): warning C4018: “<”: 有符号/无符号不匹配
+C:\Users\yeswhos\Downloads\Decision-Tree-master\决策树\C4_5.h(49,18): warning C4018: “<”: 有符号/无符号不匹配
+C:\Users\yeswhos\Downloads\Decision-Tree-master\决策树\CART.h(21,18): warning C4018: “<”: 有符号/无符号不匹配
+C:\Users\yeswhos\Downloads\Decision-Tree-master\决策树\CART.h(40,18): warning C4018: “<”: 有符号/无符号不匹配
+C:\Users\yeswhos\Downloads\Decision-Tree-master\决策树\DecisionTree.cpp(68,15): warning C4018: “<”: 有符号/无符号不匹配
+C:\Users\yeswhos\Downloads\Decision-Tree-master\决策树\DecisionTree.cpp(104,16): warning C4018: “<”: 有符号/无符号不匹配
+C:\Users\yeswhos\Downloads\Decision-Tree-master\决策树\DecisionTree.cpp(117,15): warning C4018: “<”: 有符号/无符号不匹配
+C:\Users\yeswhos\Downloads\Decision-Tree-master\决策树\DecisionTree.cpp(127,15): warning C4018: “<”: 有符号/无符号不匹配
+C:\Users\yeswhos\Downloads\Decision-Tree-master\决策树\DecisionTree.cpp(133,15): warning C4018: “<”: 有符号/无符号不匹配
+C:\Users\yeswhos\Downloads\Decision-Tree-master\决策树\DecisionTree.cpp(148,18): warning C4018: “<”: 有符号/无符号不匹配
+C:\Users\yeswhos\Downloads\Decision-Tree-master\决策树\DecisionTree.cpp(193,14): warning C4129: “G”: 不可识别的字符转义序列
+C:\Users\yeswhos\Downloads\Decision-Tree-master\决策树\DecisionTree.cpp(193,14): warning C4129: “M”: 不可识别的字符转义序列
+C:\Users\yeswhos\Downloads\Decision-Tree-master\决策树\DecisionTree.cpp(193,14): warning C4129: “C”: 不可识别的字符转义序列
+C:\Users\yeswhos\Downloads\Decision-Tree-master\决策树\DecisionTree.cpp(193,14): warning C4129: “D”: 不可识别的字符转义序列
+C:\Users\yeswhos\Downloads\Decision-Tree-master\决策树\DecisionTree.cpp(194,15): warning C4129: “G”: 不可识别的字符转义序列
+C:\Users\yeswhos\Downloads\Decision-Tree-master\决策树\DecisionTree.cpp(194,15): warning C4129: “M”: 不可识别的字符转义序列
+C:\Users\yeswhos\Downloads\Decision-Tree-master\决策树\DecisionTree.cpp(194,15): warning C4129: “C”: 不可识别的字符转义序列
+C:\Users\yeswhos\Downloads\Decision-Tree-master\决策树\DecisionTree.cpp(194,15): warning C4129: “D”: 不可识别的字符转义序列
+C:\Users\yeswhos\Downloads\Decision-Tree-master\决策树\DecisionTree.cpp(92): warning C4715: “choose_attr”: 不是所有的控件路径都返回值
+  Demo03.vcxproj -> D:\GitR\MSc-Project\Control System\Decision Tree\Demo03\Debug\Demo03.exe
