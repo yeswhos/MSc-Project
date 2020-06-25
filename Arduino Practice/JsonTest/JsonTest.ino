@@ -5,10 +5,11 @@
 Zumo32U4ProximitySensors proxSensors;
 Zumo32U4LCD lcd;
 
-char json[] = "{\"sensor\": [{\"0\": \"gostright\"}, {\"1\": \"goright\"}]}";
+//char json[] = "{\"sensor\": [{\"0\": \"gostright\"}, {\"1\": \"goright\"}]}";
 uint8_t value;
 void setup() {
-  proxSensors.initFrontSensor();
+//  proxSensors.initFrontSensor();
+  lcd.clear();
 }
 
 void loop() {
@@ -20,7 +21,7 @@ void loop() {
   //char json[] = "{\"sensor\":\"gps\",\"time\":1351824120,\"data\":[48.756080,2.302038]}";
 //  unsigned int json[] = "{"no surfacing": {"0": "NO", "1": {"flippers": {"0": "NO", "1": "YES"}}}}"
 //  char json[] = "{\"sensor\": {\"0\": NO, \"1\": {\"sensor2\": {\"0\": Yes, \"1\": no}}}}";
-  char json[] = "{\"sensor\": [{\"0\": \"gostright\"}, {\"1\": \"goright\"}]}";
+  char json[] = "{\"sensor\": [{\"0\": \"gostraight\"}, {\"1\": \"goright\"}]}";
   //StaticJsonDocument<200> doc;
   
   //deserializeJson(doc, json);
@@ -32,14 +33,17 @@ void loop() {
     Serial.println(error.c_str());
     return;
   }
-  proxSensors.read();
-  lcd.gotoXY(0, 0);
-  value = proxSensors.countsFrontWithLeftLeds();
-  lcd.print(value);
-  const char* sensor = doc["sensor"][value]["0"];
+//  proxSensors.read();
+//  lcd.gotoXY(0, 0);
+//  value = proxSensors.countsFrontWithLeftLeds();
+//  lcd.print(value);
+  uint8_t a = 1;
+  Serial.println((String)a);
+  Serial.println("here");
+  const char* sensor = doc["sensor"][0][0];
   Serial.println(sensor);
   delay(1000);
-  const char* sensor2 = doc["sensor"][value]["1"];
+  const char* sensor2 = doc["sensor"][1]["1"];
   Serial.println(sensor2);
 //  long time          = doc["time"];
 //  double latitude    = doc["data"][0];
