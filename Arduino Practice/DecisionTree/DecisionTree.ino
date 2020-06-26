@@ -24,7 +24,7 @@ void loop() {
     return;
   }
   Serial.println("here");
-  const char* value = doc["sensor"][0]["0"];
-  //const char* value = doc["Front left Sensor Left"][0]["0"];
+  //const char* value = doc["sensor"][0]["0"];
+  const char* value = doc["Front left Sensor Left"][0]["0"];
   Serial.println(value);
 }
