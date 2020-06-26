@@ -21,7 +21,7 @@ void loop() {
   //StaticJsonDocument<2000> doc;
   const size_t capacity = 0 + 390;
   DynamicJsonDocument doc(capacity);  
-  char json[] = "{\"Front left Sensor Left\": [{\"0\": \"Hit it\", \"1\": [{\"Front Sensor Right\": [{\"0\": \"run away\", \"1\": \"hit it\", \"2\": \"hit it\", \"3\": \"Hit it\"}]}], \"2\": [{\"Front Sensor Right\": [{\"0\": \"run away\", \"1\": \"run away\", \"2\": \"Hit it\", \"3\": \"Hit it\"}]}], \"3\": [{\"Front Sensor Right\": [{\"0\": \"run away\", \"1\": \"run away\", \"2\": \"run away\", \"3\": \"hit it\"}]}]}]}";
+  char json[] = "{\"Front left Sensor Left\": [{\"0\": \"Hit it\", \"1\": [{\"0\": \"run away\", \"1\": \"hit it\", \"2\": \"hit it\", \"3\": \"Hit it\"}]}, \"2\": [{\"Front Sensor Right\": [{\"0\": \"run away\", \"1\": \"run away\", \"2\": \"Hit it\", \"3\": \"Hit it\"}]}], \"3\": [{\"Front Sensor Right\": [{\"0\": \"run away\", \"1\": \"run away\", \"2\": \"run away\", \"3\": \"hit it\"}]}]}]}";
 //  int *p = malloc(sizeof(json));
 //  DynamicJsonDocument doc(*p);
   //char json[] = "{\"sensor\": [{\"0\": \"gostraight\"}, {\"1\": \"goright\"}]}";
@@ -33,6 +33,9 @@ void loop() {
   }
   Serial.println("here");
   //const char* value = doc["sensor"][0]["0"];
-  const char* value = doc["Front left Sensor Left"][0]["0"];
+  //const char* value = doc["Front left Sensor Left"][0]["0"];
+  
+  //06.26访问不到内部的json值
+  const char* value = doc["Front left Sensor Left"][1]["1"][0]["0"];
   Serial.println(value);
 }
