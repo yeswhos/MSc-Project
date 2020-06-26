@@ -16,7 +16,9 @@ void loop() {
   // put your main code here, to run repeatedly:
     Serial.begin(9600);
   while (!Serial) continue;
-  DynamicJsonDocument doc(1024);
+  
+  DynamicJsonDocument doc(malloc(sizeof(json);
+  
   // put your setup code here, to run once:
   //char json[] = "{\"sensor\":\"gps\",\"time\":1351824120,\"data\":[48.756080,2.302038]}";
 //  unsigned int json[] = "{"no surfacing": {"0": "NO", "1": {"flippers": {"0": "NO", "1": "YES"}}}}"
