@@ -86,6 +86,11 @@ void stop()
   turningRight = false;
 }
 
+void goStraight()
+{
+  motors.setSpeeds(100, 100);  
+}
+
 void loop()
 {
   // Read the front proximity sensor and gets its left value (the
@@ -132,18 +137,27 @@ void loop()
       // is not facing it directly.  Turn to the right to try to
       // make it more even.
       turnRight();
+      //turnLeft();
       senseDir = RIGHT;
     }
     else if (leftValue > rightValue)
     {
       // The left value is greater, so turn to the left.
       turnLeft();
+      //turnRight();
       senseDir = LEFT;
     }
     else
     {
       // The values are equal, so stop the motors.
-      stop();
+      
+      if(objectSeen){
+        goStraight();
+       
+      }else{
+        stop();
+      }
+      
     }
   }
   else
