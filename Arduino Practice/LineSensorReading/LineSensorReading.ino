@@ -24,7 +24,8 @@ void loop() {
   lcd.gotoXY(0, 1);
   lcd.print(selectedSensorIndex);
   lcd.print(F(": "));
-  lcd.print(map(lineSensorValues[selectedSensorIndex], 0, 2000, 0, 2));
+  //lcd.print(map(lineSensorValues[selectedSensorIndex], 0, 2000, 0, 2));
+  lcd.print(lineSensorValues[selectedSensorIndex]);
   lcd.print(F("    "));
   if (buttonA.getSingleDebouncedPress())
   {
