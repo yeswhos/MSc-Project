@@ -27,6 +27,17 @@ void hitIt(){
 void stopIt(){
   motors.setSpeeds(0, 0);
 }
+
+void turnRight()
+{
+  motors.setSpeeds(100, -100);
+}
+
+void turnLeft()
+{
+  motors.setSpeeds(-100, 100);
+}
+
 void loop() {
 
 //  Serial.begin(9600);
@@ -58,13 +69,19 @@ void loop() {
   }
   //Serial.println(*value);
   if(*value == 'H'){
+    if(a < b){
+      turnRight();  
+    }
     hitIt();
-    delay(1000);
+    delay(100);
     stopIt();  
     //Serial.println("here1");
   }else{
+    if(a > b){
+      turnLeft();
+    } 
     runAway(); 
-    delay(1000);
+    delay(100);
     stopIt();
     //Serial.println("here2");  
   }
@@ -90,5 +107,5 @@ void loop() {
   lcd.print(a);
   lcd.print(' ');
   lcd.print(b);
-  delay(100);
+  delay(10);
 }
