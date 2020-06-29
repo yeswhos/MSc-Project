@@ -11,8 +11,8 @@ uint16_t lineSensor1;
 uint16_t lineSensor2;
 uint16_t lineSensor3;
 
-const uint16_t sensorThreshold = 800;
-const uint16_t turnSpeed = 200;
+const uint16_t sensorThreshold = 1100;
+const uint16_t turnSpeed = 450;
 
 boolean warnRight = false;
 boolean warnLeft = false;
@@ -31,25 +31,25 @@ void setup() {
 void turnRight()
 {
   motors.setSpeeds(turnSpeed, -turnSpeed);
-  delay(5000);
+  delay(100);
 }
 
 void turnLeft()
 {
   motors.setSpeeds(-turnSpeed, turnSpeed);
-  delay(5000);
+  delay(100);
 }
 
 void turnAround()
 {
   motors.setSpeeds(turnSpeed, -turnSpeed);
-  delay(10000);
+  delay(500);
 }
 
 void goStraight()
 {
-  motors.setSpeeds(200, 200);
-  //delay(1000);
+  motors.setSpeeds(340, 340);
+//  delay(500);
 }
 
 
@@ -76,5 +76,6 @@ void loop() {
     turnAround();
   }
   goStraight();
+  
   Serial.println("直走");
 }
