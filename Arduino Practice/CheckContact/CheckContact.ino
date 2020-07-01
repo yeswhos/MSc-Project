@@ -2,6 +2,8 @@
 #include <Wire.h>
 #include <Zumo32U4.h>
 
+#Need to figure out 07.01
+
 // #define LOG_SERIAL // write log output to serial port
 
 Zumo32U4LCD lcd;
@@ -69,6 +71,7 @@ Accelerometer lsm303;
 boolean in_contact;
 
 void setup() {
+  lcd.clear();
   // put your setup code here, to run once:
   Wire.begin();
 
