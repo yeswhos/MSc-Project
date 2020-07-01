@@ -2,14 +2,27 @@
 #include <Wire.h>
 #include <Zumo32U4.h>
 
-#Need to figure out 07.01
+//Need to figure out 07.01
 
 // #define LOG_SERIAL // write log output to serial port
 
 Zumo32U4LCD lcd;
-Zumo32U4ButtonA button;
+Zumo32U4LineSensors lineSensors;
+Zumo32U4ButtonA buttonA;
+Zumo32U4Motors motors;
 
-#define XY_ACCELERATION_THRESHOLD 2400
+uint16_t lineSensorValues[5];
+uint16_t lineSensor1;
+uint16_t lineSensor2;
+uint16_t lineSensor3;
+boolean warnRight = false;
+boolean warnLeft = false;
+boolean warnCenter = false;
+const uint16_t sensorThreshold = 1100;
+const uint16_t turnSpeed = 400;
+
+//#define XY_ACCELERATION_THRESHOLD 2400
+#define XY_ACCELERATION_THRESHOLD 300
 #define QTR_THRESHOLD  1000
 unsigned long loop_start_time;
 unsigned long last_turn_time;
@@ -18,6 +31,16 @@ unsigned long contact_made_time;
 #define MIN_DELAY_BETWEEN_CONTACTS   1000
 #define RA_SIZE 3  // number of readings to include in running average of accelerometer readings
 #define XY_ACCELERATION_THRESHOLD 2400
+
+#define REVERSE_SPEED     200 // 0 is stopped, 400 is full speed
+#define TURN_SPEED        200
+#define SEARCH_SPEED      200
+#define SUSTAINED_SPEED   400 // switches to SUSTAINED_SPEED from FULL_SPEED after FULL_SPEED_DURATION_LIMIT ms
+#define FULL_SPEED        400
+#define STOP_DURATION     100 // ms
+#define REVERSE_DURATION  200 // ms
+#define TURN_DURATION     300 // ms
+#define RIGHT 1
 
 template <typename T>
 class RunningAverage
@@ -84,13 +107,103 @@ void setup() {
 #endif
 
   randomSeed((unsigned int) millis());
+  lcd.print(F("Press A"));
+  buttonA.waitForButton();
+  lcd.clear();
+  lineSensors.initFiveSensors();
+}
+
+void turnRight()
+{
+  motors.setSpeeds(turnSpeed, -turnSpeed);
+  delay(100);
+}
+
+void turnLeft()
+{
+  motors.setSpeeds(-turnSpeed, turnSpeed);
+  delay(100);
+}
+
+void turnAround()
+{
+  motors.setSpeeds(turnSpeed, -turnSpeed);
+  delay(500);
+}
+
+void goStraight()
+{
+  motors.setSpeeds(200, 200);
+//  delay(500);
+}
+
+void turn(char direction, bool randomize)
+{
+#ifdef LOG_SERIAL
+  Serial.print("turning ...");
+  Serial.println();
+#endif
+
+  // assume contact lost
+  on_contact_lost();
+
+  static unsigned int duration_increment = TURN_DURATION / 4;
+
+  // motors.setSpeeds(0,0);
+  // delay(STOP_DURATION);
+  motors.setSpeeds(-REVERSE_SPEED, -REVERSE_SPEED);
+  delay(REVERSE_DURATION);
+  motors.setSpeeds(TURN_SPEED * direction, -TURN_SPEED * direction);
+  delay(randomize ? TURN_DURATION + (random(8) - 2) * duration_increment : TURN_DURATION);
+  int speed = 200;
+  motors.setSpeeds(speed, speed);
+  last_turn_time = millis();
+}
+
+void goCharge(){
+    motors.setSpeeds(400, 400);
+//  delay(500);
 }
 
 void loop() {
   // put your main code here, to run repeatedly:
-  if (check_for_contact()) on_contact_made();
+  if (check_for_contact()){
+    //on_contact_made();
+      lcd.clear();
+      lcd.gotoXY(0,0);
+      lcd.println("Contact!!!, charge!");
+      ledYellow(1);
+      goCharge();
+      delay(2000);
+  } 
+  else{
+      lcd.clear();
+      lcd.gotoXY(0,0);
+      lcd.println("No Contact.");
+  }
   loop_start_time = millis();
   lsm303.readAcceleration(loop_start_time);
+  lineSensors.read(lineSensorValues);
+  lineSensor1 = lineSensorValues[0];
+  lineSensor2 = lineSensorValues[2];
+  lineSensor3 = lineSensorValues[4];
+  //Serial.println(lineSensor1);
+  warnRight = (lineSensor1 <= sensorThreshold) && (lineSensor3 >= sensorThreshold);
+  warnLeft = (lineSensor1 >= sensorThreshold) && (lineSensor3 <= sensorThreshold);
+  warnCenter = (lineSensor1 <= sensorThreshold) && (lineSensor3 <= sensorThreshold);
+  if(warnRight){
+    Serial.println("右侧");
+    turn(RIGHT, true);
+  }
+  else if(warnLeft){
+    Serial.println("左侧");
+    turnLeft();
+  }
+  else if(warnCenter){
+    Serial.println("中间");
+    turnAround();
+  }
+  goStraight();
 }
 
 bool check_for_contact()
