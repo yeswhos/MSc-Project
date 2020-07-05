@@ -81,6 +81,7 @@ void setup() {
   lcd.print(F("Press A"));
   buttonA.waitForButton();
   lcd.clear();
+
 }
 
 void runAway()
@@ -114,9 +115,10 @@ void loop() {
 
   Serial.begin(9600);
   while (!Serial) continue;
-  const size_t capacity = 0 + 390;
+  const size_t capacity = 50 + 390;
   DynamicJsonDocument doc(capacity);  
   char json[] = "{\"Contact\": [{\"0\": [{\"0\": [{\"0\": \"No object seeing\", \"1\": \"No object seeing\", \"2\": \"Object seeing\", \"3\": \"Object seeing\"}]}, {\"1\": [{\"0\": \"No object seeing\", \"1\": \"No object seeing\", \"2\": \"Object seeing\", \"3\": \"Object seeing\"}]}, {\"2\": \"Object seeing\"}, {\"3\": \"Object seeing\"} ]}, {\"1\": \"Charge\"} ]}";
+  //char json[] = "{\"Contact\": [[ [\"No object seeing\", \"No object seeing\", \"Object seeing\", \"Object seeing\"], [\"No object seeing\", \"No object seeing\", \"Object seeing\", \"Object seeing\"], \"Object seeing\", \"Object seeing\" ],  \"Charge\" ]}";
   //char json[] = "{\"Front left Sensor Left\": [{\"0\": \"Hit it\"}, {\"1\": [{\"0\": \"run away\", \"1\": \"hit it\", \"2\": \"hit it\", \"3\": \"Hit it\"}]}, {\"2\": [{\"0\": \"run away\", \"1\": \"run away\", \"2\": \"Hit it\", \"3\": \"Hit it\"}]}, {\"3\": [{\"0\": \"run away\", \"1\": \"run away\", \"2\": \"run away\", \"3\": \"hit it\"}]}]}";
   DeserializationError error = deserializeJson(doc, json);
   if (error) {
@@ -126,13 +128,15 @@ void loop() {
   }
   //Serial.println("here");
   proxSensors.read();
-  uint8_t a = map(proxSensors.countsFrontWithLeftLeds(), 0, 6, 0, 3);
-  uint8_t b = map(proxSensors.countsFrontWithRightLeds(), 0, 6, 0, 3);
+  uint8_t reading_a = map(proxSensors.countsFrontWithLeftLeds(), 0, 6, 0, 3);
+  uint8_t reading_b = map(proxSensors.countsFrontWithRightLeds(), 0, 6, 0, 3);
 //  Serial.println(String(a));
 //  Serial.println(String(b));
+  
   //const char *value;
-  const char *value = doc["Contact"][0]["0"][a]["1"][b]["1"];
-  //const char *value = doc["Contact"][0]["0"][1]["1"][0]["0"];
+  //const char *value = doc["Contact"][0]["0"][a][(String) a][b][(String) b];
+  const char *value = doc["Contact"][0]["0"][reading_a][(String) reading_a][reading_b][(String) reading_b];
+  
 //  loop_start_time = millis();
 //  lsm303.readAcceleration(loop_start_time);
 //  if (check_for_contact()){
@@ -150,9 +154,9 @@ void loop() {
 //    lcd.println("No charge");
 //  }
   
-  //const char *value = doc["Contact"][0]["0"][a][String(a)][b][String(b)];
+  //const char *value = doc["Contact"][0]["0"][0]["0"][0]["0"];
   //Serial.println("here");
-  Serial.println(*value);
+  Serial.println(value);
 
   if(*value == 'N'){
     Serial.println("No object");  
@@ -165,6 +169,7 @@ void loop() {
   //Serial.println(a);
   //Serial.println(*value);
   delay(100);
+    
 }
 
 bool check_for_contact()
