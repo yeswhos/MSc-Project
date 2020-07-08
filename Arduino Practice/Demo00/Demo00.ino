@@ -49,7 +49,7 @@ Zumo32U4ButtonA button;
 
 // Accelerometer Settings
 #define RA_SIZE 3  // number of readings to include in running average of accelerometer readings
-#define XY_ACCELERATION_THRESHOLD 2400  // for detection of contact (~16000 = magnitude of acceleration due to gravity)
+#define XY_ACCELERATION_THRESHOLD 2000  //2400 for detection of contact (~16000 = magnitude of acceleration due to gravity)
 
 // Reflectance Sensor Settings
 #define NUM_SENSORS 5
@@ -217,6 +217,7 @@ void waitForButtonAndCountDown(bool restarting)
 void turnRight()
 {
   motors.setSpeeds(200, -200);
+  in_contact = false;
 //  turningLeft = false;
 //  turningRight = true;
 }
@@ -224,9 +225,12 @@ void turnRight()
 void turnLeft()
 {
   motors.setSpeeds(-200, 200);
+  in_contact = false;
 //  turningLeft = true;
 //  turningRight = false;
 }
+
+
 //////////////////////////////////
 void loop()
 {
@@ -245,7 +249,6 @@ void loop()
   // Determine if an object is visible or not.
   bool objectSeen = leftValue >= sensorThreshold || rightValue >= sensorThreshold;
   
-
   loop_start_time = millis();
   lsm303.readAcceleration(loop_start_time);
   sensors.read(sensor_values);
@@ -273,33 +276,33 @@ void loop()
     if (objectSeen){
     // An object seen.
 
-    if (leftValue < rightValue)
-    {
-      // The right value is greater, so the object is probably
-      // closer to the robot's right LEDs, which means the robot
-      // is not facing it directly.  Turn to the right to try to
-      // make it more even.
-      //turn(RIGHT, true);
-      turnRight();
-
-    }
-    else if (leftValue > rightValue)
-    {
-      // The left value is greater, so turn to the left.
-      //turn(LEFT, true);
-      turnLeft();
-    }
-    else
-    {
-      // The values are equal, so stop the motors.
-      
-      if(objectSeen){
-        int speed = getForwardSpeed();
-        motors.setSpeeds(speed, speed);
-       
+      if (leftValue < rightValue)
+      {
+        // The right value is greater, so the object is probably
+        // closer to the robot's right LEDs, which means the robot
+        // is not facing it directly.  Turn to the right to try to
+        // make it more even.
+        //turn(RIGHT, true);
+        turnRight();
+  
+      }
+      else if (leftValue > rightValue)
+      {
+        // The left value is greater, so turn to the left.
+        //turn(LEFT, true);
+        turnLeft();
+      }
+      else
+      {
+        // The values are equal, so stop the motors.
+        
+        if(objectSeen){
+          int speed = getForwardSpeed();
+          motors.setSpeeds(speed, speed);
+          //goStraight();
+        }
       }
     }
-  }
   }
 }
 
