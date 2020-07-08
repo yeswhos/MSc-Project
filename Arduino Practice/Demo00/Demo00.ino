@@ -37,6 +37,8 @@
  * separately.
  */
 
+//issue 07.08: 看到目标冲刺，但程序并没有写到该功能，可能是转向导致速度变化（未发现）。需要测试源代码是否有相同问题。
+
 #include <avr/pgmspace.h>
 #include <Wire.h>
 #include <Zumo32U4.h>
