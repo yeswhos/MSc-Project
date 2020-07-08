@@ -10,6 +10,8 @@ Zumo32U4LCD lcd;
 Zumo32U4LineSensors lineSensors;
 Zumo32U4ButtonA buttonA;
 Zumo32U4Motors motors;
+Zumo32U4ProximitySensors proxSensors;
+const uint8_t sensorThreshold_prox = 1;
 
 uint16_t lineSensorValues[5];
 uint16_t lineSensor1;
