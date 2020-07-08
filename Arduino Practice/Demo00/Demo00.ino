@@ -19,10 +19,10 @@ boolean warnRight = false;
 boolean warnLeft = false;
 boolean warnCenter = false;
 const uint16_t sensorThreshold = 1100;
-const uint16_t turnSpeed = 400;
+const uint16_t turnSpeed = 200;
 
-//#define XY_ACCELERATION_THRESHOLD 2400
-#define XY_ACCELERATION_THRESHOLD 300
+#define XY_ACCELERATION_THRESHOLD 2400
+//#define XY_ACCELERATION_THRESHOLD 300
 #define QTR_THRESHOLD  1000
 unsigned long loop_start_time;
 unsigned long last_turn_time;
@@ -30,7 +30,6 @@ unsigned long contact_made_time;
 #define MIN_DELAY_AFTER_TURN          400  // ms = min delay before detecting contact event
 #define MIN_DELAY_BETWEEN_CONTACTS   1000
 #define RA_SIZE 3  // number of readings to include in running average of accelerometer readings
-#define XY_ACCELERATION_THRESHOLD 2400
 
 #define REVERSE_SPEED     200 // 0 is stopped, 400 is full speed
 #define TURN_SPEED        200
@@ -118,12 +117,14 @@ void setup() {
 void turnRight()
 {
   motors.setSpeeds(turnSpeed, -turnSpeed);
+  on_contact_lost();
   delay(100);
 }
 
 void turnLeft()
 {
   motors.setSpeeds(-turnSpeed, turnSpeed);
+  on_contact_lost();
   delay(100);
 }
 
@@ -140,8 +141,10 @@ void goStraight()
 }
 
 void search(){
-  motors.setSpeeds(200, 200);  
+  motors.setSpeeds(200, 200);
+  on_contact_lost();  
 }
+
 void turn(char direction, bool randomize)
 {
 #ifdef LOG_SERIAL
@@ -175,6 +178,29 @@ void loop() {
   uint8_t leftValue = proxSensors.countsFrontWithLeftLeds();
   uint8_t rightValue = proxSensors.countsFrontWithRightLeds();
   bool objectSeen = leftValue >= sensorThreshold_a || rightValue >= sensorThreshold_a;
+  
+  loop_start_time = millis();
+  lsm303.readAcceleration(loop_start_time);
+  lineSensors.read(lineSensorValues);
+  lineSensor1 = lineSensorValues[0];
+  lineSensor2 = lineSensorValues[2];
+  lineSensor3 = lineSensorValues[4];
+  //Serial.println(lineSensor1);
+  warnRight = (lineSensor1 <= sensorThreshold) && (lineSensor3 >= sensorThreshold);
+  warnLeft = (lineSensor1 >= sensorThreshold) && (lineSensor3 <= sensorThreshold);
+  warnCenter = (lineSensor1 <= sensorThreshold) && (lineSensor3 <= sensorThreshold);
+  if(warnRight){
+    Serial.println("右侧");
+    turn(RIGHT, true);
+  }
+  else if(warnLeft){
+    Serial.println("左侧");
+    turn(LEFT, true);
+  }
+  else if(warnCenter){
+    Serial.println("中间");
+    turnAround();
+  }
   if (objectSeen)
   {
     // An object seen.
@@ -186,12 +212,14 @@ void loop() {
       // closer to the robot's right LEDs, which means the robot
       // is not facing it directly.  Turn to the right to try to
       // make it more even.
+      //turn(RIGHT, true);
       turnRight();
       //turnLeft();
     }
     else if (leftValue > rightValue)
     {
       // The left value is greater, so turn to the left.
+      //turn(LEFT, true);
       turnLeft();
       //turnRight();
     }
@@ -226,29 +254,6 @@ void loop() {
       lcd.gotoXY(0,0);
       lcd.println("No Contact.");
   }
-  loop_start_time = millis();
-  lsm303.readAcceleration(loop_start_time);
-  lineSensors.read(lineSensorValues);
-  lineSensor1 = lineSensorValues[0];
-  lineSensor2 = lineSensorValues[2];
-  lineSensor3 = lineSensorValues[4];
-  //Serial.println(lineSensor1);
-  warnRight = (lineSensor1 <= sensorThreshold) && (lineSensor3 >= sensorThreshold);
-  warnLeft = (lineSensor1 >= sensorThreshold) && (lineSensor3 <= sensorThreshold);
-  warnCenter = (lineSensor1 <= sensorThreshold) && (lineSensor3 <= sensorThreshold);
-  if(warnRight){
-    Serial.println("右侧");
-    turn(RIGHT, true);
-  }
-  else if(warnLeft){
-    Serial.println("左侧");
-    turn(LEFT, true);
-  }
-  else if(warnCenter){
-    Serial.println("中间");
-    turnAround();
-  }
-  goStraight();
 }
 
 bool check_for_contact()
