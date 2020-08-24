@@ -2,56 +2,32 @@
 #include <Wire.h>
 #include <Zumo32U4.h>
 
-
 Zumo32U4LCD lcd;
 Zumo32U4ButtonA button;
+Zumo32U4LineSensors sensors;
+Zumo32U4Motors motors;
+Zumo32U4ProximitySensors proxSensors;
+
 #define RA_SIZE 3  // number of readings to include in running average of accelerometer readings
 #define XY_ACCELERATION_THRESHOLD 2000  //2400 for detection of contact (~16000 = magnitude of acceleration due to gravity)
-
-// Reflectance Sensor Settings
 #define NUM_SENSORS 5
-unsigned int sensor_values[NUM_SENSORS];
-// this might need to be tuned for different lighting conditions, surfaces, etc.
+
 #define QTR_THRESHOLD  1000 // microseconds
-Zumo32U4LineSensors sensors;
-
-// Motor Settings
-Zumo32U4Motors motors;
-
-// these might need to be tuned for different motor types
-#define REVERSE_SPEED     200 // 0 is stopped, 400 is full speed
-#define TURN_SPEED        200
-#define SEARCH_SPEED      200
-#define SUSTAINED_SPEED   400 // switches to SUSTAINED_SPEED from FULL_SPEED after FULL_SPEED_DURATION_LIMIT ms
-#define FULL_SPEED        400
-#define STOP_DURATION     100 // ms
-#define REVERSE_DURATION  200 // ms
-#define TURN_DURATION     300 // ms
-
 #define RIGHT 1
 #define LEFT -1
-
+#define FULL_SPEED_DURATION_LIMIT     250  // ms
 enum ForwardSpeed { SearchSpeed, SustainedSpeed, FullSpeed };
 ForwardSpeed _forwardSpeed;  // current forward speed setting
+
+unsigned int sensor_values[NUM_SENSORS];
 unsigned long full_speed_start_time;
-#define FULL_SPEED_DURATION_LIMIT     250  // ms
 
-// Sound Effects
-Zumo32U4Buzzer buzzer;
-const char sound_effect[] PROGMEM = "O4 T100 V15 L4 MS g12>c12>e12>G6>E12 ML>G2"; // "charge" melody
- // use V0 to suppress sound effect; v15 for max volume
-
- // Timing
 unsigned long loop_start_time;
 unsigned long last_turn_time;
 unsigned long contact_made_time;
-#define MIN_DELAY_AFTER_TURN          400  // ms = min delay before detecting contact event
-#define MIN_DELAY_BETWEEN_CONTACTS   1000  // ms = min delay between detecting new contact event
-Zumo32U4ProximitySensors proxSensors;
+
 const uint8_t sensorThreshold = 1;
-// RunningAverage class
-// based on RunningAverage library for Arduino
-// source:  http://playground.arduino.cc/Main/RunningAverage
+
 template <typename T>
 class RunningAverage
 {
@@ -237,7 +213,8 @@ void loop()
   proxSensors.read();
   uint8_t leftValue = map(proxSensors.countsFrontWithLeftLeds(), 0, 6, 0, 3);
   uint8_t rightValue = map(proxSensors.countsFrontWithRightLeds(), 0, 6, 0, 3);
-
+  
+  bool objectSeen = leftValue >= sensorThreshold || rightValue >= sensorThreshold;
   loop_start_time = millis();
   lsm303.readAcceleration(loop_start_time);
   sensors.read(sensor_values);
@@ -252,55 +229,56 @@ void loop()
     //Serial.println("No object");
     Search();  
   }
-  else if(*value == 'Object seeing'){
+  if((*value == 'Object seeing')||((sensor_values[0] < QTR_THRESHOLD))){
     Serial.println("Object");
-    if (reading_a < reading_b)
-    {
-      // The right value is greater, so the object is probably
-      // closer to the robot's right LEDs, which means the robot
-      // is not facing it directly.  Turn to the right to try to
-      // make it more even.
-      turn(RIGHT, true);
-    }
-    else if (reading_a > reading_b)
-    {
-      // The left value is greater, so turn to the left.
-      turn(LEFT, true);
-    }
-    else if(reading_a == reading_b){
-      goCharge();
-    }
-  }
+    turn(RIGHT, true);
+  }else if (sensor_values[NUM_SENSORS - 1] < QTR_THRESHOLD){
+    turn(LEFT, true);
+  }else{
+    if (check_for_contact()) on_contact_made();
+    if (objectSeen){
 
-  //const char *value = doc["Contact"][1]["1"];
-  //const char *a = doc["Contact"][0]["0"][0]["0"][0]["0"];
-  //Serial.println(a);
-  //Serial.println(*value);
+      if (leftValue < rightValue)
+      {
+        //turn(RIGHT, true);
+        turnRight();
+  
+      }
+      else if (leftValue > rightValue)
+      {
+        turnLeft();
+      }
+      else
+      {
+        if(objectSeen){
+          int speed = getForwardSpeed();
+          motors.setSpeeds(speed, speed);
+          //goStraight();
+        }
+      }
+    }
+    
+  }
   delay(100);
   }
 }
 
-// execute turn
-// direction:  RIGHT or LEFT
-// randomize: to improve searching
 void turn(char direction, bool randomize)
 {
 #ifdef LOG_SERIAL
   Serial.print("turning ...");
   Serial.println();
 #endif
-
-  // assume contact lost
   on_contact_lost();
 
-  static unsigned int duration_increment = TURN_DURATION / 4;
+  static unsigned int duration_increment = 300 / 4;
 
   // motors.setSpeeds(0,0);
-  // delay(STOP_DURATION);
-  motors.setSpeeds(-REVERSE_SPEED, -REVERSE_SPEED);
-  delay(REVERSE_DURATION);
-  motors.setSpeeds(TURN_SPEED * direction, -TURN_SPEED * direction);
-  delay(randomize ? TURN_DURATION + (random(8) - 2) * duration_increment : TURN_DURATION);
+  // delay(100);
+  motors.setSpeeds(-200, -200);
+  delay(200);
+  motors.setSpeeds(200 * direction, -200 * direction);
+  delay(randomize ? 300 + (random(8) - 2) * duration_increment : 300);
   int speed = getForwardSpeed();
   motors.setSpeeds(speed, speed);
   last_turn_time = millis();
@@ -318,13 +296,13 @@ int getForwardSpeed()
   switch (_forwardSpeed)
   {
     case FullSpeed:
-      speed = FULL_SPEED;
+      speed = 400;
       break;
     case SustainedSpeed:
-      speed = SUSTAINED_SPEED;
+      speed = 400;
       break;
     default:
-      speed = SEARCH_SPEED;
+      speed = 200;
       break;
   }
   return speed;
@@ -335,8 +313,8 @@ bool check_for_contact()
 {
   static long threshold_squared = (long) XY_ACCELERATION_THRESHOLD * (long) XY_ACCELERATION_THRESHOLD;
   return (lsm303.ss_xy_avg() >  threshold_squared) && \
-    (loop_start_time - last_turn_time > MIN_DELAY_AFTER_TURN) && \
-    (loop_start_time - contact_made_time > MIN_DELAY_BETWEEN_CONTACTS);
+    (loop_start_time - last_turn_time > 400) && \
+    (loop_start_time - contact_made_time > 1000);
 }
 
 // sound horn and accelerate on contact -- fight or flight
