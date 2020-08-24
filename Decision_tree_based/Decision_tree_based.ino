@@ -5,6 +5,7 @@
 Zumo32U4LCD lcd;
 Zumo32U4ButtonA button;
 Zumo32U4LineSensors sensors;
+Zumo32U4LineSensors lineSensors;
 Zumo32U4Motors motors;
 Zumo32U4ProximitySensors proxSensors;
 
@@ -25,7 +26,14 @@ unsigned long full_speed_start_time;
 unsigned long loop_start_time;
 unsigned long last_turn_time;
 unsigned long contact_made_time;
+uint16_t lineSensorValues[5];
+uint8_t lineSensor1;
+uint8_t lineSensor2;
+uint8_t lineSensor3;
 
+boolean warnRight = false;
+boolean warnLeft = false;
+boolean warnCenter = false;
 const uint8_t sensorThreshold = 1;
 
 template <typename T>
@@ -83,11 +91,17 @@ boolean in_contact;  // set when accelerometer detects contact with opposing rob
 
 // forward declaration
 void setForwardSpeed(ForwardSpeed speed);
-
+void turn(char direction, bool randomize);
+void on_contact_lost();
+bool check_for_contact();
+void on_contact_made();
+int getForwardSpeed();
 void setup()
 {
   sensors.initFiveSensors();
-
+  proxSensors.initFrontSensor();
+  randomSeed((unsigned int) millis());
+  lineSensors.initFiveSensors();
   // Initialize the Wire library and join the I2C bus as a master
   Wire.begin();
 
@@ -99,16 +113,8 @@ void setup()
   lsm303.getLogHeader();
 #endif
 
-  randomSeed((unsigned int) millis());
-
-  // Uncomment if necessary to correct motor directions:
-  //motors.flipLeftMotor(true);
-  //motors.flipRightMotor(true);
-
   ledYellow(1);
-  //buzzer.playMode(PLAY_AUTOMATIC);
   waitForButtonAndCountDown(false);
-  proxSensors.initFrontSensor();
 }
 
 void waitForButtonAndCountDown(bool restarting)
@@ -128,16 +134,6 @@ void waitForButtonAndCountDown(bool restarting)
 
   ledYellow(0);
   lcd.clear();
-
-  // play audible countdown
-  for (int i = 0; i < 3; i++)
-  {
-    delay(1000);
-    buzzer.playNote(NOTE_G(3), 50, 12);
-  }
-  delay(1000);
-//  buzzer.playFromProgramSpace(sound_effect);
-  delay(1000);
 
   // reset loop variables
   in_contact = false;  // 1 if contact made; 0 if no contact or contact lost
@@ -192,7 +188,9 @@ void loop()
     return;
   }
   //const char *value = doc["Contact"][0]["0"][reading_a][(String) reading_a][reading_b][(String) reading_b];
-  
+  uint8_t leftValue = proxSensors.countsFrontWithLeftLeds();
+  uint8_t rightValue = proxSensors.countsFrontWithRightLeds();
+
   lineSensors.read(lineSensorValues);
   lineSensor1 = lineSensorValues[0];
   lineSensor2 = lineSensorValues[2];
@@ -211,15 +209,15 @@ void loop()
   }
   
   proxSensors.read();
-  uint8_t leftValue = map(proxSensors.countsFrontWithLeftLeds(), 0, 6, 0, 3);
-  uint8_t rightValue = map(proxSensors.countsFrontWithRightLeds(), 0, 6, 0, 3);
+  uint8_t reading_a = map(proxSensors.countsFrontWithLeftLeds(), 0, 6, 0, 3);
+  uint8_t reading_b = map(proxSensors.countsFrontWithRightLeds(), 0, 6, 0, 3);
   
   bool objectSeen = leftValue >= sensorThreshold || rightValue >= sensorThreshold;
   loop_start_time = millis();
   lsm303.readAcceleration(loop_start_time);
   sensors.read(sensor_values);
   
-  const char *value = doc["Contact"][on_contact_lost][(String)on_contact_lost][reading_a][(String) reading_a][reading_b][(String) reading_b];
+  const char *value = doc["Contact"][0]["0"][reading_a][(String) reading_a][reading_b][(String) reading_b];
 
   if(*value == 'Charge'){
     goCharge();  
@@ -238,18 +236,13 @@ void loop()
     if (check_for_contact()) on_contact_made();
     if (objectSeen){
 
-      if (leftValue < rightValue)
-      {
+      if (leftValue < rightValue){
         //turn(RIGHT, true);
         turnRight();
   
-      }
-      else if (leftValue > rightValue)
-      {
+      }else if (leftValue > rightValue){
         turnLeft();
-      }
-      else
-      {
+      }else{
         if(objectSeen){
           int speed = getForwardSpeed();
           motors.setSpeeds(speed, speed);
@@ -260,8 +253,8 @@ void loop()
     
   }
   delay(100);
-  }
 }
+
 
 void turn(char direction, bool randomize)
 {
